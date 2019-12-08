@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10">
+
+  <!-- Defines the globally unique identifier for the package. -->
+  <Identity Name="c98a6066-8154-4e87-bcf7-65e3e0c7741b"
+            Publisher="CN=toivjon"
+            Version="1.0.0.0"/>
+
+  <!-- Defines additional metadata about the package inc. how the package appears to users. -->
+  <Properties>
+    <PublisherDisplayName>toivjon</PublisherDisplayName>
+    <DisplayName>uwp-hello-xbox</DisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <!-- Defines the other packages that are required for the application. -->
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal"
+                        MinVersion="10.0.0.0"
+                        MaxVersionTested="10.0.0.0"/>
+  </Dependencies>
+  
+  <!-- Declares union of languages, display scales and DX feature levels of the package. -->
+  <Resources>
+    <Resource Language="x-generate"/>  
+  </Resources>
+  
+</Package>
