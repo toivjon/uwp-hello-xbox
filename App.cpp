@@ -1,4 +1,4 @@
-#include "pch.h"
+#include <iostream>
 
 [Platform::MTAThread]
 int main(Platform::Array<Platform::String^>^)

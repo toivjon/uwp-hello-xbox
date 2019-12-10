@@ -4,8 +4,8 @@
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="view_source.cpp" />
+    <ClCompile Include="app.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -36,6 +36,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
+    <ClInclude Include="view_source.h" />
   </ItemGroup>
 </Project>
