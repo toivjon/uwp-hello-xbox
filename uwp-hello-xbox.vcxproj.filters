@@ -6,6 +6,7 @@
   <ItemGroup>
     <ClCompile Include="view_source.cpp" />
     <ClCompile Include="app.cpp" />
+    <ClCompile Include="view.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -37,5 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="view_source.h" />
+    <ClInclude Include="view.h" />
   </ItemGroup>
 </Project>
