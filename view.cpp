@@ -80,17 +80,17 @@ void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 
 }
 
-void View::OnDpiChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args)
+void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 
 }
 
-void View::OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args)
+void View::OnOrientationChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 
 }
 
-void View::OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args)
+void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)
 {
 
 }
