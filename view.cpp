@@ -9,6 +9,11 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 
+View::View() : mWindowClosed(false), mWindowVisible(true)
+{
+	// ...
+}
+
 void View::Initialize(CoreApplicationView^ applicationView)
 {
 	// observe the activation of the main view of the application.
@@ -35,24 +40,34 @@ void View::SetWindow(CoreWindow^ window)
 
 void View::Load(String^ entryPoint)
 {
-	// TODO initialize or restore scene resources and state ...
+	// ... scene resource or state restoration logics here
 }
 
 void View::Run()
 {
-	// TODO execute application logics ...
+	// we arrive here to run the main loop after our core window has been activated.
+	while (mWindowClosed) {
+		if (mWindowVisible) {
+			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+			// TODO update
+			// TODO render
+		} else {
+			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+		}
+	}
 }
 
 void View::Uninitialize()
 {
-	// TODO perform foreground exit logic ...
+	// ... torn while being foreground events here
 }
 
 // ============================================================================
 
 void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
 {
-
+	// here we activate the core window so it becomes visible when our application is activated.
+	CoreWindow::GetForCurrentThread()->Activate();
 }
 
 void View::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
@@ -72,12 +87,12 @@ void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 
 void View::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
 {
-
+	mWindowVisible = args->Visible;
 }
 
 void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 {
-
+	mWindowClosed = true;
 }
 
 void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
