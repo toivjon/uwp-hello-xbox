@@ -40,7 +40,10 @@ void View::SetWindow(CoreWindow^ window)
 
 void View::Load(String^ entryPoint)
 {
-	// ... scene resource or state restoration logics here
+	// initialize application here whether not already initialized.
+	if (!mApplication) {
+		mApplication = std::make_unique<Application>();
+	}
 }
 
 void View::Run()
@@ -49,8 +52,8 @@ void View::Run()
 	while (mWindowClosed) {
 		if (mWindowVisible) {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			// TODO update
-			// TODO render
+			mApplication->Update();
+			mApplication->Render();
 		} else {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}

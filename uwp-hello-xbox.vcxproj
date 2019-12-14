@@ -137,6 +137,7 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="application.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="view.cpp" />
     <ClCompile Include="view_source.cpp" />
@@ -151,6 +152,7 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application.h" />
     <ClInclude Include="view.h" />
     <ClInclude Include="view_source.h" />
   </ItemGroup>

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <memory>
+#include "application.h"
+
 namespace xbox
 {
 	ref class View sealed : public Windows::ApplicationModel::Core::IFrameworkView
@@ -27,7 +30,8 @@ namespace xbox
 		void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 		void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 	private:
-		bool mWindowClosed;
-		bool mWindowVisible;
+		bool							mWindowClosed;
+		bool							mWindowVisible;
+		std::unique_ptr<Application>	mApplication;
 	};
 }
