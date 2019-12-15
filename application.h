@@ -9,5 +9,6 @@ namespace xbox
 
 		void Update();
 		void Render();
+		void OnWindowSizeChanged();
 	};
 }

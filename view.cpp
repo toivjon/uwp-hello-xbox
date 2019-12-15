@@ -94,19 +94,19 @@ void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
 	// TODO set logical size to device resources ...
-	// TODO call application on window size changed ...
+	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 	// TODO set DPI to device resources ...
-	// TODO call application on window size changed ...
+	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnOrientationChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 	// TODO set orientation to device resources ...
-	// TODO call application on window size changed ...
+	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)

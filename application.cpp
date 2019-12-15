@@ -16,3 +16,8 @@ void Application::Render()
 {
 	// ...
 }
+
+void Application::OnWindowSizeChanged()
+{
+	// ...
+}
