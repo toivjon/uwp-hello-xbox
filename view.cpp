@@ -1,8 +1,5 @@
 #include "view.h"
 
-#include <ppltasks.h>
-
-using namespace concurrency;
 using namespace xbox;
 using namespace Platform;
 using namespace Windows::ApplicationModel;
