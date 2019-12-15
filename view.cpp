@@ -1,5 +1,8 @@
 #include "view.h"
 
+#include <ppltasks.h>
+
+using namespace concurrency;
 using namespace xbox;
 using namespace Platform;
 using namespace Windows::ApplicationModel;
@@ -65,8 +68,6 @@ void View::Uninitialize()
 	// ... torn while being foreground events here
 }
 
-// ============================================================================
-
 void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
 {
 	// here we activate the core window so it becomes visible when our application is activated.
@@ -75,17 +76,12 @@ void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs
 
 void View::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
 {
-
+	// ... perform operations when application gets suspended here
 }
 
 void View::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 {
-
-}
-
-void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
-{
-
+	// ... perfom operations when application gets resumed here
 }
 
 void View::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
@@ -98,17 +94,25 @@ void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 	mWindowClosed = true;
 }
 
+void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
+{
+	// TODO set logical size to device resources ...
+	// TODO call application on window size changed ...
+}
+
 void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
-
+	// TODO set DPI to device resources ...
+	// TODO call application on window size changed ...
 }
 
 void View::OnOrientationChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
-
+	// TODO set orientation to device resources ...
+	// TODO call application on window size changed ...
 }
 
 void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)
 {
-
+	// TODO validate device resources ...
 }
