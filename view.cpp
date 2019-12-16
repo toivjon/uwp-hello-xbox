@@ -93,23 +93,42 @@ void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 
 void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
-	// TODO set logical size to device resources ...
+	// notify rendering devices and application about the window size change.
+	GetDeviceResources()->SetLogicalSize(Size(sender->Bounds.Width, sender->Bounds.Height));
 	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
-	// TODO set DPI to device resources ...
+	// notify rendering devices and application about the DPI change.
+	GetDeviceResources()->SetDpi(sender->LogicalDpi);
 	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnOrientationChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
-	// TODO set orientation to device resources ...
+	// notify rendering devices and application about the orientation change.
+	GetDeviceResources()->SetCurrentOrientation(sender->CurrentOrientation);
 	mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)
 {
-	// TODO validate device resources ...
+	// ensure that rendering devices will (re)validate themselves.
+	GetDeviceResources()->ValidateDevice();
+}
+
+std::shared_ptr<DeviceResources> View::GetDeviceResources()
+{
+	if (mDeviceResources && mDeviceResources->IsDeviceRemoved()) {
+		mDeviceResources = nullptr;
+		// TODO notify application about the device removal ...
+	}
+
+	if (!mDeviceResources) {
+		mDeviceResources = std::make_shared<DeviceResources>();
+		mDeviceResources->SetWindow(CoreWindow::GetForCurrentThread());
+		// TODO create renderers via application ...
+	}
+	return mDeviceResources;
 }

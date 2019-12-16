@@ -8,6 +8,7 @@
     <ClCompile Include="view.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="device_resources.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
@@ -41,5 +42,6 @@
     <ClInclude Include="view_source.h" />
     <ClInclude Include="view.h" />
     <ClInclude Include="application.h" />
+    <ClInclude Include="device_resources.h" />
   </ItemGroup>
 </Project>

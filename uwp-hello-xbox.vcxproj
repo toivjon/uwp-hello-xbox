@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="device_resources.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="view.cpp" />
     <ClCompile Include="view_source.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="device_resources.h" />
     <ClInclude Include="view.h" />
     <ClInclude Include="view_source.h" />
   </ItemGroup>
