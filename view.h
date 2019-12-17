@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "device_resources.h"
+#include "renderer.h"
 
 #include <memory>
 
@@ -33,11 +34,12 @@ namespace xbox
 		void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 	private:
 		// private access to device resources to ensure that device resources are re-created on previous device removal.
-		std::shared_ptr<DeviceResources> GetDeviceResources();
+		// std::shared_ptr<DeviceResources> GetDeviceResources();
 	private:
 		bool								mWindowClosed;
 		bool								mWindowVisible;
 		std::unique_ptr<Application>		mApplication;
 		std::shared_ptr<DeviceResources>	mDeviceResources;
+		std::unique_ptr<Renderer>			mRenderer;
 	};
 }

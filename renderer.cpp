@@ -147,7 +147,7 @@ Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 		}
 	);
 	ThrowIfFailed(D3DCompile(shaderSrc, strlen(shaderSrc), "", nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &mVertexShader, &error));
-	ThrowIfFailed(D3DCompile(shaderSrc, strlen(shaderSrc), "", nullptr, nullptr, "VSMain", "ps_5_0", 0, 0, &mPixelShader, &error));
+	ThrowIfFailed(D3DCompile(shaderSrc, strlen(shaderSrc), "", nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &mPixelShader, &error));
 
 	// define the layout for the input vertex data.
 	std::vector<D3D12_INPUT_ELEMENT_DESC> inputDescriptor = {

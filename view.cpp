@@ -22,6 +22,9 @@ void View::Initialize(CoreApplicationView^ applicationView)
 	// observe the suspension and resume of the application.
 	CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &View::OnSuspending);
 	CoreApplication::Resuming += ref new EventHandler<Platform::Object^>(this, &View::OnResuming);
+
+	// initialize our D3D12 renderer instance.
+	mRenderer = std::make_unique<Renderer>();
 }
 
 void View::SetWindow(CoreWindow^ window)
@@ -49,11 +52,12 @@ void View::Load(String^ entryPoint)
 void View::Run()
 {
 	// we arrive here to run the main loop after our core window has been activated.
-	while (mWindowClosed) {
+	while (!mWindowClosed) {
 		if (mWindowVisible) {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			mApplication->Update();
-			mApplication->Render();
+			// mApplication->Update();
+			// mApplication->Render();
+			mRenderer->Render();
 		} else {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}
@@ -69,6 +73,7 @@ void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs
 {
 	// here we activate the core window so it becomes visible when our application is activated.
 	CoreWindow::GetForCurrentThread()->Activate();
+	mRenderer->SetWindow(CoreWindow::GetForCurrentThread());
 }
 
 void View::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
@@ -93,33 +98,35 @@ void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 
 void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
+	mRenderer->SetWindow(sender);
 	// notify rendering devices and application about the window size change.
-	GetDeviceResources()->SetLogicalSize(Size(sender->Bounds.Width, sender->Bounds.Height));
-	mApplication->OnWindowSizeChanged();
+	// GetDeviceResources()->SetLogicalSize(Size(sender->Bounds.Width, sender->Bounds.Height));
+	// mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 	// notify rendering devices and application about the DPI change.
-	GetDeviceResources()->SetDpi(sender->LogicalDpi);
-	mApplication->OnWindowSizeChanged();
+	// GetDeviceResources()->SetDpi(sender->LogicalDpi);
+	// mApplication->OnWindowSizeChanged();
 }
 
 void View::OnOrientationChanged(DisplayInformation^ sender, Platform::Object^ args)
 {
 	// notify rendering devices and application about the orientation change.
-	GetDeviceResources()->SetCurrentOrientation(sender->CurrentOrientation);
-	mApplication->OnWindowSizeChanged();
+	// GetDeviceResources()->SetCurrentOrientation(sender->CurrentOrientation);
+	// mApplication->OnWindowSizeChanged();
 }
 
 void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)
 {
 	// ensure that rendering devices will (re)validate themselves.
-	GetDeviceResources()->ValidateDevice();
+	// GetDeviceResources()->ValidateDevice();
 }
-
+/*
 std::shared_ptr<DeviceResources> View::GetDeviceResources()
 {
+	
 	if (mDeviceResources && mDeviceResources->IsDeviceRemoved()) {
 		mDeviceResources = nullptr;
 		// TODO notify application about the device removal ...
@@ -128,7 +135,8 @@ std::shared_ptr<DeviceResources> View::GetDeviceResources()
 	if (!mDeviceResources) {
 		mDeviceResources = std::make_shared<DeviceResources>();
 		mDeviceResources->SetWindow(CoreWindow::GetForCurrentThread());
-		// TODO create renderers via application ...
+		mRenderer = std::make_unique<Renderer>();
 	}
 	return mDeviceResources;
 }
+*/
