@@ -21,7 +21,11 @@ DeviceResources::DeviceResources() : mCurrentFrame(0)
 
 void DeviceResources::SetLogicalSize(Size logicalSize)
 {
-	// ...
+	// recreate window size dependent resources if logical size changes.
+	if (logicalSize != mLogicalSize) {
+		mLogicalSize = logicalSize;
+		CreateWindowResources();
+	}
 }
 
 void DeviceResources::SetDpi(float dpi)
@@ -46,7 +50,14 @@ bool DeviceResources::IsDeviceRemoved()
 
 void DeviceResources::SetWindow(Windows::UI::Core::CoreWindow^ window)
 {
-	// ...
+	// store window reference.
+	mWindow = window;
+
+	// store logical size dimensions.
+	mLogicalSize = Size(window->Bounds.Width, window->Bounds.Height);
+
+	// (re)create window size dependent resources.
+	CreateWindowResources();
 }
 
 void DeviceResources::CreateDeviceResources()
@@ -120,4 +131,16 @@ void DeviceResources::CreateDeviceResources()
 	if (mFenceEvent == nullptr) {
 		ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 	}
+}
+
+void DeviceResources::CreateWindowResources()
+{
+	// assign viewport definitions based on the assigned window.
+	mViewport = {};
+	mViewport.MaxDepth = D3D12_MAX_DEPTH;
+	mViewport.MinDepth = D3D12_MIN_DEPTH;
+	mViewport.TopLeftX = 0;
+	mViewport.TopLeftY = 0;
+	mViewport.Width = mWindow->Bounds.Width;
+	mViewport.Height = mWindow->Bounds.Height;
 }

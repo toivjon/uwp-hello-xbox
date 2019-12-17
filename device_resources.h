@@ -1,5 +1,6 @@
 #pragma once
 
+#include <agile.h>
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <wrl.h>
@@ -20,6 +21,7 @@ namespace xbox
 		void SetWindow(Windows::UI::Core::CoreWindow^ window);
 	private:
 		void CreateDeviceResources();
+		void CreateWindowResources();
 	private:
 		UINT64 mCurrentFrame;
 
@@ -30,10 +32,17 @@ namespace xbox
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>	mRtvHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>	mDsvHeap;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator>  mCommandAllocators[BUFFER_COUNT];
+		D3D12_VIEWPORT									mViewport;
 
 		// CPU/GPU synchronization
 		Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 		UINT64								mFenceValues[BUFFER_COUNT];
 		HANDLE								mFenceEvent;
+
+		// a cached reference to target window
+		Platform::Agile<Windows::UI::Core::CoreWindow> mWindow;
+
+		// cached device properties
+		Windows::Foundation::Size mLogicalSize;
 	};
 }
