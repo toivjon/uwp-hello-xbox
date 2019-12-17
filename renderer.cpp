@@ -3,7 +3,6 @@
 #include <array>
 #include <chrono>
 #include <d3dcompiler.h>
-#include <vector>
 
 // undefine min macro and use the std::min from the <algorithm>
 #if defined(min)
@@ -69,7 +68,7 @@ inline void flush(ComPtr<ID3D12CommandQueue> commandQueue, ComPtr<ID3D12Fence> f
 	waitFence(fence, signalValue, event, milliseconds::max());
 }
 
-Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}
+Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 {
 	// create a factory or DXGI item instances.
 	ThrowIfFailed(CreateDXGIFactory2(0u, IID_PPV_ARGS(&mDXGIFactory)));
@@ -265,6 +264,125 @@ Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}
 	uint64_t fenceValue = 1;
 	mFenceEvent = CreateEvent(nullptr, false, false, nullptr);
 	flush(mCommandQueue, mFence, fenceValue, mFenceEvent);
+	mFenceValue = 0;
+
+	// create a vertex buffer view from the vertex buffer definitions.
+	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
+	mVertexBufferView.StrideInBytes = sizeof(Vertex);
+	mVertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
 }
 
+void Renderer::SetWindow(Windows::UI::Core::CoreWindow^ window)
+{
+	// release old swap chain if exists.
+	if (mSwapchain) {
+		mSwapchain->Release();
+	}
 
+	// release old render targets if any exists.
+	if (!mRenderTargets.empty()) {
+		mRenderTargets.clear();
+	}
+
+	// create a swap chain for the target core window instance.
+	ComPtr<IDXGISwapChain1> swapChain;
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+	swapChainDesc.Width = (UINT)window->Bounds.Width;
+	swapChainDesc.Height = (UINT)window->Bounds.Height;
+	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.Stereo = false;
+	swapChainDesc.SampleDesc = { 1, 0 };
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.BufferCount = BUFFER_COUNT;
+	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+	swapChainDesc.Flags = 0;
+	ThrowIfFailed(mDXGIFactory->CreateSwapChainForCoreWindow(mCommandQueue.Get(), reinterpret_cast<IUnknown*>(window), &swapChainDesc, nullptr, &swapChain));
+	ThrowIfFailed(swapChain.As(&mSwapchain));
+
+	// resize viewport to match with the window size.
+	mViewport = {};
+	mViewport.TopLeftX = 0;
+	mViewport.TopLeftY = 0;
+	mViewport.MaxDepth = D3D12_MAX_DEPTH;
+	mViewport.MinDepth = D3D12_MIN_DEPTH;
+	mViewport.Width = window->Bounds.Width;
+	mViewport.Height = window->Bounds.Height;
+
+	// get the size of the render target descriptor and the position where heap starts.
+	auto rtvSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
+
+	// construct a new render target view for each rendering buffer.
+	for (auto i = 0; i < BUFFER_COUNT; i++) {
+		ComPtr<ID3D12Resource> buffer;
+		ThrowIfFailed(mSwapchain->GetBuffer(i, IID_PPV_ARGS(&buffer)));
+		mDevice->CreateRenderTargetView(buffer.Get(), nullptr, rtvHeap);
+		mRenderTargets.push_back(buffer);
+		rtvHeap.ptr += rtvSize;
+	}
+}
+
+void Renderer::Render()
+{
+	// reset the memory associated with the command allocator.
+	ThrowIfFailed(mCommandAllocators[mBufferIndex]->Reset());
+
+	// reset the state of the command list.
+	ThrowIfFailed(mCommandList->Reset(mCommandAllocators[mBufferIndex].Get(), mPipelineState.Get()));
+
+	// assign the root signature.
+	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+
+	// configure rasterizer state viewport and scissors.
+	mCommandList->RSSetViewports(1, &mViewport);
+	mCommandList->RSSetScissorRects(1, &mScissors);
+
+	// switch resources to be used as rendering targets.
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = mRenderTargets[mBufferIndex].Get();
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	mCommandList->ResourceBarrier(1, &barrier);
+
+	// assign the back buffer as the rendering target.
+	auto rtvSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
+	if (mBufferIndex == 1) {
+		rtvHeap.ptr += rtvSize;
+	}
+	mCommandList->OMSetRenderTargets(1, &rtvHeap, false, nullptr);
+
+	// perform the actual rendering on the rendering target.
+	float clearColor[] = { 0.5f, 0.5f, 0.5f, 0.5f };
+	mCommandList->ClearRenderTargetView(rtvHeap, clearColor, 0, nullptr);
+	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
+	mCommandList->DrawInstanced(3, 1, 0, 0);
+
+	// switch resources to be used as presentation items.
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	mCommandList->ResourceBarrier(1, &barrier);
+
+	// close the command list to finalize rendering.
+	ThrowIfFailed(mCommandList->Close());
+
+	// submit the command list into the command queue for the execution.
+	std::vector<ID3D12CommandList*> const commandList = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(1, &commandList[0]);
+
+	// present the current back buffer onto screen.
+	ThrowIfFailed(mSwapchain->Present(1, 0));
+
+	// wait until the GPU has completed rendering.
+	signalFence(mCommandQueue, mFence, mFenceValue);
+	waitFence(mFence, mFenceValue, mFenceEvent, milliseconds::max());
+
+	// proceed to next buffer in a round-robin manner.
+	mBufferIndex = (mBufferIndex + 1) % BUFFER_COUNT;
+}
