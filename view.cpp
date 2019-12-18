@@ -1,6 +1,5 @@
 #include "view.h"
 
-using namespace xbox;
 using namespace Platform;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Activation;

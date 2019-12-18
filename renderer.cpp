@@ -14,8 +14,6 @@
 #undef max
 #endif
 
-using namespace xbox;
-
 using namespace Microsoft::WRL;
 using namespace std::chrono;
 
