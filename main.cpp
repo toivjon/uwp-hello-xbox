@@ -1,7 +1,6 @@
 #include "view_source.h"
 
 using namespace Windows::ApplicationModel::Core;
-using namespace xbox;
 
 // ============================================================================
 // The entry point of the application.
