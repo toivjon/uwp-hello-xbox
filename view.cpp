@@ -43,10 +43,7 @@ void View::SetWindow(CoreWindow^ window)
 
 void View::Load(String^ entryPoint)
 {
-	// initialize application here whether not already initialized.
-	if (!mApplication) {
-		mApplication = std::make_unique<Application>();
-	}
+	// ... do we need to do something?
 }
 
 void View::Run()
@@ -55,8 +52,6 @@ void View::Run()
 	while (!mWindowClosed) {
 		if (mWindowVisible) {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			// mApplication->Update();
-			// mApplication->Render();
 			mRenderer->Render();
 		} else {
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "application.h"
 #include "device_resources.h"
 #include "renderer.h"
 
@@ -38,7 +37,6 @@ namespace xbox
 	private:
 		bool								mWindowClosed;
 		bool								mWindowVisible;
-		std::unique_ptr<Application>		mApplication;
 		std::shared_ptr<DeviceResources>	mDeviceResources;
 		std::unique_ptr<Renderer>			mRenderer;
 	};

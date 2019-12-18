@@ -137,7 +137,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="application.cpp" />
     <ClCompile Include="device_resources.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderer.cpp" />
@@ -154,7 +153,6 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application.h" />
     <ClInclude Include="device_resources.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="view.h" />

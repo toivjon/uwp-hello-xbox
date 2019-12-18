@@ -7,7 +7,6 @@
     <ClCompile Include="view_source.cpp" />
     <ClCompile Include="view.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="application.cpp" />
     <ClCompile Include="device_resources.cpp" />
     <ClCompile Include="renderer.cpp" />
   </ItemGroup>
@@ -42,7 +41,6 @@
   <ItemGroup>
     <ClInclude Include="view_source.h" />
     <ClInclude Include="view.h" />
-    <ClInclude Include="application.h" />
     <ClInclude Include="device_resources.h" />
     <ClInclude Include="renderer.h" />
   </ItemGroup>
