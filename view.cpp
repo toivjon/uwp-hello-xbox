@@ -118,20 +118,3 @@ void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Ob
 	// ensure that rendering devices will (re)validate themselves.
 	// GetDeviceResources()->ValidateDevice();
 }
-/*
-std::shared_ptr<DeviceResources> View::GetDeviceResources()
-{
-	
-	if (mDeviceResources && mDeviceResources->IsDeviceRemoved()) {
-		mDeviceResources = nullptr;
-		// TODO notify application about the device removal ...
-	}
-
-	if (!mDeviceResources) {
-		mDeviceResources = std::make_shared<DeviceResources>();
-		mDeviceResources->SetWindow(CoreWindow::GetForCurrentThread());
-		mRenderer = std::make_unique<Renderer>();
-	}
-	return mDeviceResources;
-}
-*/

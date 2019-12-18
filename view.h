@@ -1,6 +1,5 @@
 #pragma once
 
-#include "device_resources.h"
 #include "renderer.h"
 
 #include <memory>
@@ -32,12 +31,8 @@ namespace xbox
 		void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 		void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 	private:
-		// private access to device resources to ensure that device resources are re-created on previous device removal.
-		// std::shared_ptr<DeviceResources> GetDeviceResources();
-	private:
 		bool								mWindowClosed;
 		bool								mWindowVisible;
-		std::shared_ptr<DeviceResources>	mDeviceResources;
 		std::unique_ptr<Renderer>			mRenderer;
 	};
 }
