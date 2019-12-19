@@ -2,8 +2,6 @@
 
 #include "renderer.h"
 
-#include <memory>
-
 ref class View sealed : public Windows::ApplicationModel::Core::IFrameworkView
 {
 public:
@@ -29,7 +27,7 @@ protected:
 	void OnOrientationChanged(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 	void OnDisplayContentsInvalidated(Windows::Graphics::Display::DisplayInformation^ sender, Platform::Object^ args);
 private:
-	bool								mWindowClosed;
-	bool								mWindowVisible;
-	std::unique_ptr<Renderer>			mRenderer;
+	bool		mWindowClosed;
+	bool		mWindowVisible;
+	Renderer^	mRenderer;
 };

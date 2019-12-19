@@ -7,7 +7,7 @@
 
 #define BUFFER_COUNT 2
 
-class Renderer final
+ref class Renderer sealed
 {
 public:
 	Renderer();

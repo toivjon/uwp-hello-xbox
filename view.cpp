@@ -23,7 +23,7 @@ void View::Initialize(CoreApplicationView^ applicationView)
 	CoreApplication::Resuming += ref new EventHandler<Platform::Object^>(this, &View::OnResuming);
 
 	// initialize our D3D12 renderer instance.
-	mRenderer = std::make_unique<Renderer>();
+	mRenderer = ref new Renderer();
 }
 
 void View::SetWindow(CoreWindow^ window)
