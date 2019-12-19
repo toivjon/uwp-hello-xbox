@@ -2,10 +2,9 @@
 
 #include "renderer.h"
 
-ref class View sealed : public Windows::ApplicationModel::Core::IFrameworkView
+ref class View : public Windows::ApplicationModel::Core::IFrameworkView
 {
 public:
-	View();
 	virtual void Initialize(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView);
 	virtual void SetWindow(Windows::UI::Core::CoreWindow^ window);
 	virtual void Load(Platform::String^ entryPoint);

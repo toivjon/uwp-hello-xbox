@@ -8,11 +8,6 @@ using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 using namespace Windows::UI::Core;
 
-View::View() : mWindowClosed(false), mWindowVisible(true)
-{
-	// ...
-}
-
 void View::Initialize(CoreApplicationView^ applicationView)
 {
 	// observe the activation of the main view of the application.
@@ -38,7 +33,7 @@ void View::SetWindow(CoreWindow^ window)
 
 void View::Load(String^ entryPoint)
 {
-	// ... do we need to do something?
+	// ... nothing to do
 }
 
 void View::Run()
@@ -56,7 +51,7 @@ void View::Run()
 
 void View::Uninitialize()
 {
-	// ... torn while being foreground events here
+	// ... nothing to do
 }
 
 void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
