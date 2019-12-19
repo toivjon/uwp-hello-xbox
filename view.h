@@ -12,10 +12,7 @@ public:
 	virtual void Run();
 	virtual void Uninitialize();
 protected:
-	// application lifecycle event handlers
 	void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args);
-	void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ args);
-	void OnResuming(Platform::Object^ sender, Platform::Object^ args);
 
 	// window event handlers
 	void OnVisibilityChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::VisibilityChangedEventArgs^ args);

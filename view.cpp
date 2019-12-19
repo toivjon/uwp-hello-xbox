@@ -17,10 +17,6 @@ void View::Initialize(CoreApplicationView^ applicationView)
 {
 	// observe the activation of the main view of the application.
 	applicationView->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &View::OnActivated);
-	
-	// observe the suspension and resume of the application.
-	CoreApplication::Suspending += ref new EventHandler<SuspendingEventArgs^>(this, &View::OnSuspending);
-	CoreApplication::Resuming += ref new EventHandler<Platform::Object^>(this, &View::OnResuming);
 
 	// initialize our D3D12 renderer instance.
 	mRenderer = ref new Renderer();
@@ -68,16 +64,6 @@ void View::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs
 	// here we activate the core window so it becomes visible when our application is activated.
 	CoreWindow::GetForCurrentThread()->Activate();
 	mRenderer->SetWindow(CoreWindow::GetForCurrentThread());
-}
-
-void View::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
-{
-	// ... perform operations when application gets suspended here
-}
-
-void View::OnResuming(Platform::Object^ sender, Platform::Object^ args)
-{
-	// ... perfom operations when application gets resumed here
 }
 
 void View::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
