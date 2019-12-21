@@ -14,6 +14,7 @@
 #undef max
 #endif
 
+using namespace Windows::Graphics::Display;
 using namespace Microsoft::WRL;
 using namespace std::chrono;
 
@@ -320,6 +321,21 @@ void Renderer::SetWindow(Windows::UI::Core::CoreWindow^ window)
 		mRenderTargets.push_back(buffer);
 		rtvHeap.ptr += rtvSize;
 	}
+}
+
+void Renderer::SetResolution(float width, float height)
+{
+	// TODO ...
+}
+
+void Renderer::SetDpi(float dpi)
+{
+	// TODO ...
+}
+
+void Renderer::ValidateDevice()
+{
+	// TODO ...
 }
 
 void Renderer::Render()

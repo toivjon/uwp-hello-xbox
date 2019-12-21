@@ -13,6 +13,9 @@ public:
 	Renderer();
 
 	void SetWindow(Windows::UI::Core::CoreWindow^ window);
+	void SetResolution(float width, float height);
+	void SetDpi(float dpi);
+	void ValidateDevice();
 		
 	void Render();
 private:
