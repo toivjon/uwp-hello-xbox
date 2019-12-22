@@ -312,36 +312,21 @@ void Renderer::Render()
 	// reset the memory associated with the command allocator.
 	ThrowIfFailed(mCommandAllocators[mBufferIndex]->Reset());
 
-	// reset the state of the command list.
+	// get the render target view for the current frame.
+	auto renderTargetView = RenderTargetView();
+
+	// reset and build the pipeline command list for the rendering.
 	ThrowIfFailed(mCommandList->Reset(mCommandAllocators[mBufferIndex].Get(), mPipelineState.Get()));
-
-	// assign the root signature.
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
-
-	// configure rasterizer viewport and scissor rectangle.
 	mCommandList->RSSetViewports(1, &mViewport);
 	mCommandList->RSSetScissorRects(1, &mScissors);
-
-	// switch resources to be used as rendering targets.
 	mCommandList->ResourceBarrier(1, &RTVBarrier(D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	// assign the back buffer as the rendering target.
-	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
-	if (mBufferIndex == 1) {
-		rtvHeap.ptr += mRTVDescriptorSize;
-	}
-
-	// add the actual drawing commands to command list.
-	mCommandList->ClearRenderTargetView(rtvHeap, BlackColor, 0, nullptr);
-	mCommandList->OMSetRenderTargets(1, &rtvHeap, false, nullptr);
+	mCommandList->ClearRenderTargetView(renderTargetView, BlackColor, 0, nullptr);
+	mCommandList->OMSetRenderTargets(1, &renderTargetView, false, nullptr);
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mCommandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
 	mCommandList->DrawInstanced(3, 1, 0, 0);
-
-	// switch resources to be used as presentation items.
 	mCommandList->ResourceBarrier(1, &RTVBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-
-	// close the command list to finalize rendering.
 	ThrowIfFailed(mCommandList->Close());
 
 	// submit the command list into the command queue for the execution.
@@ -393,4 +378,17 @@ D3D12_RESOURCE_BARRIER Renderer::RTVBarrier(D3D12_RESOURCE_STATES from, D3D12_RE
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	return barrier;
+}
+
+// ============================================================================
+// Get the render target view for the current buffer index.
+//
+// This function will locate the handle for the render target view for current
+// frame index. Correct handle is queried with the RTV descriptor offset.
+// ============================================================================
+D3D12_CPU_DESCRIPTOR_HANDLE Renderer::RenderTargetView()
+{
+	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHeap.ptr += mBufferIndex * mRTVDescriptorSize;
+	return rtvHeap;
 }

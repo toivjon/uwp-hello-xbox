@@ -21,6 +21,7 @@ public:
 	void WaitForGPU();
 private:
 	D3D12_RESOURCE_BARRIER RTVBarrier(D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to);
+	D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView();
 private:
 	Microsoft::WRL::ComPtr<IDXGIFactory4>				mDXGIFactory;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4>				mDXGIAdapter;
