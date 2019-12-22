@@ -20,6 +20,8 @@ public:
 	void Render();
 	void WaitForGPU();
 private:
+	D3D12_RESOURCE_BARRIER RTVBarrier(D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to);
+private:
 	Microsoft::WRL::ComPtr<IDXGIFactory4>				mDXGIFactory;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4>				mDXGIAdapter;
 	Microsoft::WRL::ComPtr<ID3D12Device2>				mDevice;

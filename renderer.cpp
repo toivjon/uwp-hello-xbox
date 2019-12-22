@@ -323,14 +323,7 @@ void Renderer::Render()
 	mCommandList->RSSetScissorRects(1, &mScissors);
 
 	// switch resources to be used as rendering targets.
-	D3D12_RESOURCE_BARRIER barrier = {};
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier.Transition.pResource = mRenderTargets[mBufferIndex].Get();
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	mCommandList->ResourceBarrier(1, &barrier);
+	mCommandList->ResourceBarrier(1, &RTVBarrier(D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 	// assign the back buffer as the rendering target.
 	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
@@ -346,9 +339,7 @@ void Renderer::Render()
 	mCommandList->DrawInstanced(3, 1, 0, 0);
 
 	// switch resources to be used as presentation items.
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	mCommandList->ResourceBarrier(1, &barrier);
+	mCommandList->ResourceBarrier(1, &RTVBarrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
 	// close the command list to finalize rendering.
 	ThrowIfFailed(mCommandList->Close());
@@ -384,4 +375,22 @@ void Renderer::WaitForGPU()
 
 	// increment the fence value.
 	mFenceValue++;
+}
+
+// ============================================================================
+// Create a state transition resource barrier for the current render target.
+//
+// Function creates a new barrier definition for the currently used rendering 
+// target. Using a barrier is necessary when building the draw command list.
+// ============================================================================
+D3D12_RESOURCE_BARRIER Renderer::RTVBarrier(D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to)
+{
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = mRenderTargets[mBufferIndex].Get();
+	barrier.Transition.StateBefore = from;
+	barrier.Transition.StateAfter = to;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	return barrier;
 }
