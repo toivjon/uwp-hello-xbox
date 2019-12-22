@@ -35,38 +35,6 @@ inline void ThrowIfFailed(HRESULT hr) {
 	}
 }
 
-// a helper utility to signal the target fence.
-inline uint64_t signalFence(ComPtr<ID3D12CommandQueue> commandQueue, ComPtr<ID3D12Fence> fence, uint64_t& value)
-{
-	// increment the fence value to indicate a new signal.
-	uint64_t signalValue = ++value;
-
-	// try to signal the fence with the incremented signal value.
-	ThrowIfFailed(commandQueue->Signal(fence.Get(), signalValue));
-
-	return signalValue;
-}
-
-// a helper utility to wait for fence to receive a signal from GPU.
-inline void waitFence(ComPtr<ID3D12Fence> fence, uint64_t fenceValue, HANDLE event, milliseconds duration)
-{
-	if (fence->GetCompletedValue() < fenceValue)
-	{
-		// specify which event to trigger after fence has been finished.
-		ThrowIfFailed(fence->SetEventOnCompletion(fenceValue, event));
-
-		// wait for a signal or until the given duration has elapsed.
-		WaitForSingleObject(event, static_cast<DWORD>(duration.count()));
-	}
-}
-
-// a helper utility to flush and wait commands to be delivered to GPU.
-inline void flush(ComPtr<ID3D12CommandQueue> commandQueue, ComPtr<ID3D12Fence> fence, uint64_t& value, HANDLE event)
-{
-	auto signalValue = signalFence(commandQueue, fence, value);
-	waitFence(fence, signalValue, event, milliseconds::max());
-}
-
 Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 {
 	// create a factory or DXGI item instances.
@@ -260,10 +228,8 @@ Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 
 	// wait until the provided vertices have been uploaded to GPU.
 	ThrowIfFailed(mDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFence)));
-	uint64_t fenceValue = 1;
 	mFenceEvent = CreateEvent(nullptr, false, false, nullptr);
-	flush(mCommandQueue, mFence, fenceValue, mFenceEvent);
-	mFenceValue = 0;
+	WaitForGPU();
 
 	// create a vertex buffer view from the vertex buffer definitions.
 	mVertexBufferView.BufferLocation = mVertexBuffer->GetGPUVirtualAddress();
@@ -394,9 +360,27 @@ void Renderer::Render()
 	ThrowIfFailed(mSwapchain->Present(1, 0));
 
 	// wait until the GPU has completed rendering.
-	signalFence(mCommandQueue, mFence, mFenceValue);
-	waitFence(mFence, mFenceValue, mFenceEvent, milliseconds::max());
+	WaitForGPU();
 
 	// proceed to next buffer in a round-robin manner.
 	mBufferIndex = (mBufferIndex + 1) % BUFFER_COUNT;
+}
+
+// ============================================================================
+// Wait for GPU work to complete.
+// 
+// This function will wait until the GPU has processed the currently pending
+// work. Necessary to synchronize flow state between the application and GPU.
+// ============================================================================
+void Renderer::WaitForGPU()
+{
+	// add a signal command to the command queue.
+	ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mFenceValue)); // values?
+
+	// wait for fence to receive a signal from the GPU.
+	ThrowIfFailed(mFence->SetEventOnCompletion(mFenceValue, mFenceEvent)); // values?
+	WaitForSingleObjectEx(mFenceEvent, INFINITE, false);
+
+	// increment the fence value.
+	mFenceValue++;
 }

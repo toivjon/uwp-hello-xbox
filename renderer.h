@@ -18,6 +18,7 @@ public:
 	void ValidateDevice();
 		
 	void Render();
+	void WaitForGPU();
 private:
 	Microsoft::WRL::ComPtr<IDXGIFactory4>				mDXGIFactory;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4>				mDXGIAdapter;
