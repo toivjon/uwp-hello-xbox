@@ -25,6 +25,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Device2>				mDevice;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue>			mCommandQueue;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>		mRTVHeap;
+	UINT												mRTVDescriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator>		mCommandAllocators[BUFFER_COUNT];
 	Microsoft::WRL::ComPtr<ID3D12RootSignature>			mRootSignature;
 	Microsoft::WRL::ComPtr<ID3DBlob>					mVertexShader;

@@ -35,7 +35,7 @@ inline void ThrowIfFailed(HRESULT hr) {
 	}
 }
 
-Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
+Renderer::Renderer() : mRTVDescriptorSize(0), mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 {
 	// create a factory or DXGI item instances.
 	ThrowIfFailed(CreateDXGIFactory2(0u, IID_PPV_ARGS(&mDXGIFactory)));
@@ -75,6 +75,9 @@ Renderer::Renderer() : mScissors{0, 0, LONG_MAX, LONG_MAX}, mBufferIndex(0)
 	rtvHeapDescriptor.NumDescriptors = BUFFER_COUNT;
 	rtvHeapDescriptor.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	ThrowIfFailed(mDevice->CreateDescriptorHeap(&rtvHeapDescriptor, IID_PPV_ARGS(&mRTVHeap)));
+
+	// store the render target view descriptor size for further usage.
+	mRTVDescriptorSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	// create a command allocator for each buffer.
 	for (auto i = 0u; i < BUFFER_COUNT; i++) {
@@ -275,8 +278,7 @@ void Renderer::SetWindow(Windows::UI::Core::CoreWindow^ window)
 	mViewport.Width = window->Bounds.Width;
 	mViewport.Height = window->Bounds.Height;
 
-	// get the size of the render target descriptor and the position where heap starts.
-	auto rtvSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	// get the position where heap starts.
 	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
 
 	// construct a new render target view for each rendering buffer.
@@ -285,7 +287,7 @@ void Renderer::SetWindow(Windows::UI::Core::CoreWindow^ window)
 		ThrowIfFailed(mSwapchain->GetBuffer(i, IID_PPV_ARGS(&buffer)));
 		mDevice->CreateRenderTargetView(buffer.Get(), nullptr, rtvHeap);
 		mRenderTargets.push_back(buffer);
-		rtvHeap.ptr += rtvSize;
+		rtvHeap.ptr += mRTVDescriptorSize;
 	}
 }
 
@@ -315,7 +317,7 @@ void Renderer::Render()
 	// assign the root signature.
 	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-	// configure rasterizer state viewport and scissors.
+	// configure rasterizer viewport and scissor rectangle.
 	mCommandList->RSSetViewports(1, &mViewport);
 	mCommandList->RSSetScissorRects(1, &mScissors);
 
@@ -330,16 +332,15 @@ void Renderer::Render()
 	mCommandList->ResourceBarrier(1, &barrier);
 
 	// assign the back buffer as the rendering target.
-	auto rtvSize = mDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
 	if (mBufferIndex == 1) {
-		rtvHeap.ptr += rtvSize;
+		rtvHeap.ptr += mRTVDescriptorSize;
 	}
-	mCommandList->OMSetRenderTargets(1, &rtvHeap, false, nullptr);
 
-	// perform the actual rendering on the rendering target.
+	// add the actual drawing commands to command list.
 	float clearColor[] = { 0.5f, 0.5f, 0.5f, 0.5f };
 	mCommandList->ClearRenderTargetView(rtvHeap, clearColor, 0, nullptr);
+	mCommandList->OMSetRenderTargets(1, &rtvHeap, false, nullptr);
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mCommandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
 	mCommandList->DrawInstanced(3, 1, 0, 0);
