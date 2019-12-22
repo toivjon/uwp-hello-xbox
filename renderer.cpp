@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include <array>
-#include <chrono>
 #include <d3dcompiler.h>
 
 // undefine min macro and use the std::min from the <algorithm>
@@ -16,7 +15,6 @@
 
 using namespace Windows::Graphics::Display;
 using namespace Microsoft::WRL;
-using namespace std::chrono;
 
 // vertex structure
 struct Vertex
