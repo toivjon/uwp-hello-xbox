@@ -16,6 +16,9 @@
 using namespace Windows::Graphics::Display;
 using namespace Microsoft::WRL;
 
+// a constant for black color
+const float BlackColor[] = { 0.f, 0.f, 0.f, 1.f };
+
 // vertex structure
 struct Vertex
 {
@@ -336,8 +339,7 @@ void Renderer::Render()
 	}
 
 	// add the actual drawing commands to command list.
-	float clearColor[] = { 0.5f, 0.5f, 0.5f, 0.5f };
-	mCommandList->ClearRenderTargetView(rtvHeap, clearColor, 0, nullptr);
+	mCommandList->ClearRenderTargetView(rtvHeap, BlackColor, 0, nullptr);
 	mCommandList->OMSetRenderTargets(1, &rtvHeap, false, nullptr);
 	mCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	mCommandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
