@@ -19,7 +19,7 @@ void View::Initialize(CoreApplicationView^ applicationView)
 	// observe the activation of the main view of the application.
 	applicationView->Activated += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &View::OnActivated);
 
-	// initialize our D3D12 renderer instance.
+	// create a renderer for the application.
 	mRenderer = ref new Renderer();
 }
 
@@ -32,14 +32,8 @@ void View::Initialize(CoreApplicationView^ applicationView)
 void View::SetWindow(CoreWindow^ window)
 {
 	// observe the events of the main window of the application.
-	window->SizeChanged += ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &View::OnSizeChanged);
 	window->VisibilityChanged += ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(this, &View::OnVisibilityChanged);
 	window->Closed += ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &View::OnClosed);
-
-	// observe changes in the current display.
-	DisplayInformation^ displayInformation = DisplayInformation::GetForCurrentView();
-	displayInformation->DpiChanged += ref new TypedEventHandler<DisplayInformation^, Object^>(this, &View::OnDpiChanged);
-	displayInformation->DisplayContentsInvalidated += ref new TypedEventHandler<DisplayInformation^, Object^>(this, &View::OnDisplayContentsInvalidated);
 }
 
 // ============================================================================
@@ -52,7 +46,6 @@ void View::Load(String^ entryPoint)
 {
 	// ... nothing
 }
-
 
 // ============================================================================
 // Run the application view.
@@ -72,7 +65,6 @@ void View::Run()
 		}
 	}
 }
-
 
 // ============================================================================
 // Release and dispose reserved resources.
@@ -118,37 +110,4 @@ void View::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ a
 void View::OnClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 {
 	mWindowClosed = true;
-}
-
-// ============================================================================
-// Listener for changes in the application window size.
-//
-// Runtime calls this function when the size of the application window is being
-// changed. It's important that we notify our renderer about the size change.
-// ============================================================================
-void View::OnSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
-{
-	mRenderer->SetResolution(sender->Bounds.Width, sender->Bounds.Height);
-}
-
-// ============================================================================
-// Listener for changes in the application display pixels per inch ratio.
-// 
-// Runtime calls this function when the display pixels per inch ratio changes.
-// It's again important us to notify our renderer about this event.
-// ============================================================================
-void View::OnDpiChanged(DisplayInformation^ sender, Platform::Object^ args)
-{
-	mRenderer->SetDpi(sender->LogicalDpi);;
-}
-
-// ============================================================================
-// Listener for changes in the display content changes (like device removed).
-//
-// Runtime calls this function when there's a need to redraw display contents.
-// This occurs due a device removal where we need to validate current device.
-// ============================================================================
-void View::OnDisplayContentsInvalidated(DisplayInformation^ sender, Platform::Object^ args)
-{
-	mRenderer->ValidateDevice();
 }

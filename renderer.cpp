@@ -53,7 +53,7 @@ Renderer::Renderer() : mRTVDescriptorSize(0), mScissors{0, 0, LONG_MAX, LONG_MAX
 			continue;
 
 		// skip adapters that cannot be created.
-		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, __uuidof(ID3D12Device), nullptr)))
+		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_10_0, __uuidof(ID3D12Device), nullptr)))
 			continue;
 
 		// we found a good candidate as the selected adapter.
@@ -61,7 +61,7 @@ Renderer::Renderer() : mRTVDescriptorSize(0), mScissors{0, 0, LONG_MAX, LONG_MAX
 	}
 
 	// create a new D3D12 device with the target graphics adapter.
-	ThrowIfFailed(D3D12CreateDevice(mDXGIAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&mDevice)));
+	ThrowIfFailed(D3D12CreateDevice(mDXGIAdapter.Get(), D3D_FEATURE_LEVEL_10_0, IID_PPV_ARGS(&mDevice)));
 
 	// create a command queue to send commands to pipeline.
 	D3D12_COMMAND_QUEUE_DESC queueDescriptor = {};
@@ -241,72 +241,24 @@ Renderer::Renderer() : mRTVDescriptorSize(0), mScissors{0, 0, LONG_MAX, LONG_MAX
 	mVertexBufferView.SizeInBytes = sizeof(Vertex) * 3;
 }
 
+// ============================================================================
+// Specify the target window for the renderer.
+// 
+// This function is used to assign a core window for the renderer. Calling this
+// function will trigger the (re)creation of the size dependent resources.
+// ============================================================================
 void Renderer::SetWindow(Windows::UI::Core::CoreWindow^ window)
 {
-	// release old swap chain if exists.
-	if (mSwapchain) {
-		mSwapchain->Release();
-	}
-
-	// release old render targets if any exists.
-	if (!mRenderTargets.empty()) {
-		mRenderTargets.clear();
-	}
-
-	// create a swap chain for the target core window instance.
-	ComPtr<IDXGISwapChain1> swapChain;
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-	swapChainDesc.Width = (UINT)window->Bounds.Width;
-	swapChainDesc.Height = (UINT)window->Bounds.Height;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.Stereo = false;
-	swapChainDesc.SampleDesc = { 1, 0 };
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = BUFFER_COUNT;
-	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-	swapChainDesc.Flags = 0;
-	ThrowIfFailed(mDXGIFactory->CreateSwapChainForCoreWindow(mCommandQueue.Get(), reinterpret_cast<IUnknown*>(window), &swapChainDesc, nullptr, &swapChain));
-	ThrowIfFailed(swapChain.As(&mSwapchain));
-
-	// resize viewport to match with the window size.
-	mViewport = {};
-	mViewport.TopLeftX = 0;
-	mViewport.TopLeftY = 0;
-	mViewport.MaxDepth = D3D12_MAX_DEPTH;
-	mViewport.MinDepth = D3D12_MIN_DEPTH;
-	mViewport.Width = window->Bounds.Width;
-	mViewport.Height = window->Bounds.Height;
-
-	// get the position where heap starts.
-	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
-
-	// construct a new render target view for each rendering buffer.
-	for (auto i = 0; i < BUFFER_COUNT; i++) {
-		ComPtr<ID3D12Resource> buffer;
-		ThrowIfFailed(mSwapchain->GetBuffer(i, IID_PPV_ARGS(&buffer)));
-		mDevice->CreateRenderTargetView(buffer.Get(), nullptr, rtvHeap);
-		mRenderTargets.push_back(buffer);
-		rtvHeap.ptr += mRTVDescriptorSize;
-	}
+	mWindow = window;
+	CreateSizeDependentResources();
 }
 
-void Renderer::SetResolution(float width, float height)
-{
-	// TODO ...
-}
-
-void Renderer::SetDpi(float dpi)
-{
-	// TODO ...
-}
-
-void Renderer::ValidateDevice()
-{
-	// TODO ...
-}
-
+// ============================================================================
+// Render and present a frame.
+//
+// This function combines the whole rendering logic into a single function. In
+// a more sophisticated scenario, this function would be split logically.
+// ============================================================================
 void Renderer::Render()
 {
 	// reset the memory associated with the command allocator.
@@ -335,7 +287,7 @@ void Renderer::Render()
 
 	// present the current back buffer onto screen.
 	ThrowIfFailed(mSwapchain->Present(1, 0));
-
+	
 	// wait until the GPU has completed rendering.
 	WaitForGPU();
 
@@ -391,4 +343,67 @@ D3D12_CPU_DESCRIPTOR_HANDLE Renderer::RenderTargetView()
 	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHeap.ptr += mBufferIndex * mRTVDescriptorSize;
 	return rtvHeap;
+}
+
+// ============================================================================
+// (Re-)Creates the size dependent resources.
+//
+// Used to (re-)create all window size or style dependent resources to maintain
+// the rendering operations to render the contents for the window correctly.
+// ============================================================================
+void Renderer::CreateSizeDependentResources()
+{
+	// wait until previous GPU operations have completed.
+	WaitForGPU();
+
+	// release old render targets if any exists.
+	for (auto rtv : mRenderTargets) {
+		rtv->Release();
+	}
+
+	// resize old or create a swap chain.
+	auto width = (UINT)mWindow->Bounds.Width;
+	auto height = (UINT)mWindow->Bounds.Height;
+	if (mSwapchain != nullptr) {
+		ThrowIfFailed(mSwapchain->ResizeBuffers(BUFFER_COUNT, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
+	} else {
+		ComPtr<IDXGISwapChain1> swapChain;
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+		swapChainDesc.Width = width;
+		swapChainDesc.Height = height;
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.Stereo = false;
+		swapChainDesc.SampleDesc = { 1, 0 };
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.BufferCount = BUFFER_COUNT;
+		swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+		swapChainDesc.Flags = 0;
+		ThrowIfFailed(mDXGIFactory->CreateSwapChainForCoreWindow(mCommandQueue.Get(), reinterpret_cast<IUnknown*>(mWindow.Get()), &swapChainDesc, nullptr, &swapChain));
+		ThrowIfFailed(swapChain.As(&mSwapchain));
+	}
+
+	// resize viewport to match with the window size.
+	mViewport = {};
+	mViewport.TopLeftX = 0;
+	mViewport.TopLeftY = 0;
+	mViewport.MaxDepth = D3D12_MAX_DEPTH;
+	mViewport.MinDepth = D3D12_MIN_DEPTH;
+	mViewport.Width = mWindow->Bounds.Width;
+	mViewport.Height = mWindow->Bounds.Height;
+
+	// get the position where heap starts.
+	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
+
+	// construct a new render target view for each rendering buffer.
+	mRenderTargets.clear();
+	for (auto i = 0; i < BUFFER_COUNT; i++) {
+		ComPtr<ID3D12Resource> buffer;
+		ThrowIfFailed(mSwapchain->GetBuffer(i, IID_PPV_ARGS(&buffer)));
+		mDevice->CreateRenderTargetView(buffer.Get(), nullptr, rtvHeap);
+		mRenderTargets.push_back(buffer);
+		rtvHeap.ptr += mRTVDescriptorSize;
+	}
+	mRenderTargets;
 }

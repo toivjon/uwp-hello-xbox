@@ -1,5 +1,6 @@
 #pragma once
 
+#include <agile.h>
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <vector>
@@ -11,17 +12,13 @@ ref class Renderer sealed
 {
 public:
 	Renderer();
-
 	void SetWindow(Windows::UI::Core::CoreWindow^ window);
-	void SetResolution(float width, float height);
-	void SetDpi(float dpi);
-	void ValidateDevice();
-		
 	void Render();
 	void WaitForGPU();
 private:
 	D3D12_RESOURCE_BARRIER RTVBarrier(D3D12_RESOURCE_STATES from, D3D12_RESOURCE_STATES to);
 	D3D12_CPU_DESCRIPTOR_HANDLE RenderTargetView();
+	void CreateSizeDependentResources();
 private:
 	Microsoft::WRL::ComPtr<IDXGIFactory4>				mDXGIFactory;
 	Microsoft::WRL::ComPtr<IDXGIAdapter4>				mDXGIAdapter;
@@ -45,8 +42,9 @@ private:
 	HANDLE								mFenceEvent;
 	uint64_t							mFenceValue;
 
-	D3D12_VIEWPORT	mViewport;
-	D3D12_RECT		mScissors;
+	Platform::Agile<Windows::UI::Core::CoreWindow>	mWindow;
+	D3D12_VIEWPORT									mViewport;
+	D3D12_RECT										mScissors;
 
 	unsigned int mBufferIndex;
 };
