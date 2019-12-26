@@ -409,5 +409,4 @@ void Renderer::CreateSizeDependentResources()
 		mRenderTargets.push_back(buffer);
 		rtvHeap.ptr += mRTVDescriptorSize;
 	}
-	mRenderTargets;
 }
