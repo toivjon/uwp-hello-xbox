@@ -1,5 +1,5 @@
 # uwp-hello-xbox
-A simple tryout to make a triangle to appear on the screen.
+A simple tryout to make a triangle to appear on the screen on Windows 10 and Xbox One.
 
 Contains an UWP application code that has a single view with a simple triangle.
 
