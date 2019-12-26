@@ -2,6 +2,12 @@
 
 #include "renderer.h"
 
+// ============================================================================
+// An object that presents the view for the application.
+//
+// Application (view)s are created with the view source factory instances. View
+// presents an object that forms the user interface for the application.
+// ============================================================================
 ref class View : public Windows::ApplicationModel::Core::IFrameworkView
 {
 public:
