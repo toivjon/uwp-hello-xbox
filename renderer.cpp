@@ -397,6 +397,13 @@ void Renderer::CreateSizeDependentResources()
 	mViewport.Width = mWindow->Bounds.Width;
 	mViewport.Height = mWindow->Bounds.Height;
 
+	// resize scissor rect to match with the viewport size.
+	mScissors = {};
+	mScissors.left = 0;
+	mScissors.top = 0;
+	mScissors.right = static_cast<LONG>(mViewport.Width);
+	mScissors.bottom = static_cast<LONG>(mViewport.Height);
+
 	// get the position where heap starts.
 	auto rtvHeap = mRTVHeap->GetCPUDescriptorHandleForHeapStart();
 

@@ -41,16 +41,23 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource>				mVertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW							mVertexBufferView;
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain4>				mSwapchain;
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> mRenderTargets;
+	// ===================================
+	// CPU<->GPU synchronization resources
+	// ===================================
 
 	Microsoft::WRL::ComPtr<ID3D12Fence>	mFence;
 	HANDLE								mFenceEvent;
 	uint64_t							mFenceValue;
 
-	Platform::Agile<Windows::UI::Core::CoreWindow>	mWindow;
-	D3D12_VIEWPORT									mViewport;
-	D3D12_RECT										mScissors;
+	// ==========================
+	// window dependent resources
+	// ==========================
+
+	Platform::Agile<Windows::UI::Core::CoreWindow>		mWindow;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4>				mSwapchain;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> mRenderTargets;
+	D3D12_VIEWPORT										mViewport;
+	D3D12_RECT											mScissors;
 
 	unsigned int mBufferIndex;
 };
