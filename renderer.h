@@ -8,6 +8,12 @@
 
 #define BUFFER_COUNT 2
 
+// ============================================================================
+// A renderer object to draw stuff on the screen.
+//
+// Renderer is used to perform draw operations to make things visible. Here we
+// have a super simple DX12 renderer that draws a simple triangle on the view.
+// ============================================================================
 ref class Renderer sealed
 {
 public:
