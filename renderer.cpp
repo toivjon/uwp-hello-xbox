@@ -53,15 +53,19 @@ Renderer::Renderer() : mRTVDescriptorSize(0), mScissors{0, 0, LONG_MAX, LONG_MAX
 			continue;
 
 		// skip adapters that cannot be created.
-		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_10_0, __uuidof(ID3D12Device), nullptr)))
+		if (FAILED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, __uuidof(ID3D12Device), nullptr)))
 			continue;
 
 		// we found a good candidate as the selected adapter.
 		ThrowIfFailed(adapter.As(&mDXGIAdapter));
 	}
 
-	// create a new D3D12 device with the target graphics adapter.
-	ThrowIfFailed(D3D12CreateDevice(mDXGIAdapter.Get(), D3D_FEATURE_LEVEL_10_0, IID_PPV_ARGS(&mDevice)));
+	// create a new D3D12 device with the target graphics adapter or create WARP if needed (XBox One Dev Mode).
+	if (FAILED(D3D12CreateDevice(mDXGIAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&mDevice)))) {
+		ComPtr<IDXGIAdapter> warpAdapter;
+		ThrowIfFailed(mDXGIFactory->EnumWarpAdapter(IID_PPV_ARGS(&warpAdapter)));
+		ThrowIfFailed(D3D12CreateDevice(warpAdapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&mDevice)));
+	}
 
 	// create a command queue to send commands to pipeline.
 	D3D12_COMMAND_QUEUE_DESC queueDescriptor = {};
